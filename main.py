@@ -41,3 +41,11 @@ df = pd.merge(weather, nsv, on='time', how='inner')
 
 # 6. 기타
 df = df.rename(columns={'DoseRate_nSv': 'nsv'})
+order = ['time','기온(°C)', '풍속(m/s)', '풍향(16방위)', '습도(%)', '증기압(hPa)', '이슬점온도(°C)',
+       '현지기압(hPa)', '해면기압(hPa)', '시정(10m)', '지면온도(°C)', '5cm 지중온도(°C)',
+       '10cm 지중온도(°C)', '20cm 지중온도(°C)', '30cm 지중온도(°C)','nsv']
+df = df[order]
+
+# df.to_csv('data//mergeData.csv')
+
+# === 상관계수 파악 ===
