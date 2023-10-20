@@ -20,6 +20,7 @@ nsv = pd.read_csv('data/nsv/jeonnam.csv', encoding='cp949')
 # 1. NaN 개수 확인하기
 # print(weather.isnull().sum()) # ==> 지울 것들 : 기온 QC플래그, 강수량 (mm), 강수량 QC플래그, 풍속 QC플래그, 풍향 QC플래그, 습도 QC플래그, 현지기압 QC플래그, 해면기압 QC플래그, 일조 (hr), 일조 QC플래그, 일사(MJ/m2), 일사 QC플래그, 적설 (cm), 3시간신적설 (cm), 운형(운형약어), 최저운고 (100m ), 지면상태(지면상태코드), 현상번호(국내식), 지면온도 QC플래그
 weather = weather.drop(['기온 QC플래그','강수량(mm)','전운량(10분위)','중하층운량(10분위)','강수량 QC플래그','풍속 QC플래그','풍향 QC플래그','습도 QC플래그','현지기압 QC플래그','해면기압 QC플래그','일조(hr)','일조 QC플래그','일사(MJ/m2)','일사 QC플래그','적설(cm)','3시간신적설(cm)','운형(운형약어)','최저운고(100m )','지면상태(지면상태코드)','현상번호(국내식)','지면온도 QC플래그'], axis=1)
+#print(nsv.isnull().sum())
 #print(weather.isnull().sum())
 
 # 2. 결측값 채우기(NaN => 이전값 대치)
@@ -28,5 +29,15 @@ weather = weather.fillna(method='ffill')
 
 # 3. 불필요한 변수 제거
 weather = weather.drop(['지점','지점명'],axis=1)
-#nsv = nsv.drop(['id','device_id','data_type','CDMA_tel','ip_addr','state','DoseRate_warn','DoseRate_alert'], axis=1)
-# 4. 
+nsv = nsv.drop(['id','device_id','data_type','CDMA_tel','InteTemp','ElecTemp','ip_addr','DoseRate_uR','DoseRate_low','DoseRate_high','InteTemp_high','ElecTemp_high','state','DoseRate_warn','DoseRate_alert'],axis=1)
+
+# 4. 날짜 포맷 맞추기
+weather['time'] = pd.to_datetime(weather['일시'])
+nsv['time'] = pd.to_datetime(nsv['rcv_time'])
+weather = weather.drop(['일시'], axis=1)
+nsv = nsv.drop(['rcv_time'], axis=1)
+# 5. 데이터 통합
+df = pd.merge(weather, nsv, on='time', how='inner')
+
+# 6. 기타
+df = df.rename(columns={'DoseRate_nSv': 'nsv'})
