@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
 
 # === 데이터 불러오기 및 통합 === 
 weather2017 = pd.read_csv('data/weather/weather2017.csv', encoding='cp949')
@@ -49,4 +50,28 @@ df = df[order]
 # df.to_csv('data//mergeData.csv')
 
 # === 상관계수 파악 ===
+# 다중공선성 문제를 일으키는 변수 제거
+# 꼭 필요한 변수는 성능이 안좋더라도 사용하기로 결정
 
+df = df.drop(['해면기압(hPa)','5cm 지중온도(°C)','10cm 지중온도(°C)', '20cm 지중온도(°C)', '30cm 지중온도(°C)'],axis=1)
+
+# === MinMax === 
+
+print(df.columns)
+# MinMaxScaler 객체 생성
+scaler = MinMaxScaler()
+
+# 스케일링을 적용할 데이터를 선택
+data_to_scale = df[['기온(°C)', '풍속(m/s)', '풍향(16방위)', '습도(%)', '증기압(hPa)','이슬점온도(°C)', '현지기압(hPa)', '시정(10m)', '지면온도(°C)', 'nsv']]
+
+# MinMax 변환
+scaled_data = scaler.fit_transform(data_to_scale)
+scaled_df = pd.DataFrame(scaled_data, columns=data_to_scale.columns)
+
+# 'time' 변수와 스케일링된 데이터를 합침
+df = pd.concat([df['time'], scaled_df], axis=1)
+
+# 합쳐진 결과 확인
+print(df)
+
+# === Train / Test / Val Split ===
